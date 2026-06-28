@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'main.tf'
+      - 'variables.tf'
+      - 'outputs.tf'
+      - 'terraform.tfvars'
+      - '.github/workflows/deploy.yml' # Keep this so pipeline changes trigger it
   workflow_dispatch: # <-- This enables the manual execution button
 permissions:
   id-token: write
