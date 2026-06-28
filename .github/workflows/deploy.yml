@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-
+  workflow_dispatch: # <-- This enables the manual execution button
 permissions:
   id-token: write
   contents: read
