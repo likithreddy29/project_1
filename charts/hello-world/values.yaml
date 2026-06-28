@@ -4,7 +4,7 @@ image:
   # We will update this repository URL in Phase 3 once our ECR is fully ready
   repository: 834715822389.dkr.ecr.us-east-1.amazonaws.com/hello-world-app
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "27acd9c76aae3698d0f47cbb3fbe01947a9ff733"
 
 service:
   type: ClusterIP
