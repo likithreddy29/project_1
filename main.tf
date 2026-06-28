@@ -60,6 +60,23 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
+# Grant your local IAM user full cluster access
+  access_entries = {
+    local_admin = {
+      kubernetes_groups = []
+      principal_arn     = "arn:aws:iam::834715822389:user/likith_project1"
+
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
     worker_nodes = {
       min_size     = 1
