@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  # We will update this repository URL in Phase 3 once our ECR is fully ready
+  repository: 834715822389.dkr.ecr.us-east-1.amazonaws.com/hello-world-app
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 5000
