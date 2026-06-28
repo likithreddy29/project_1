@@ -1,0 +1,55 @@
+name: "Application CI/CD Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app.py'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'charts/**'
+      - '.github/workflows/app-deploy.yml'
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::834715822389:role/github-actions-ecr-role # Ensure this matches your OIDC deploy role name
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: hello-world-app
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      # Update the Helm values.yaml file with the new unique image tag
+      - name: Update Helm Image Tag
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          sed -i "s/tag: .*/tag: \"$IMAGE_TAG\"/" charts/hello-world/values.yaml
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add charts/hello-world/values.yaml
+          git commit -m "chore: update image tag to $IMAGE_TAG [skip ci]"
+          git push origin main
